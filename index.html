@@ -93,11 +93,11 @@
         }
 
         .backspace {
-            background: #555;
+            background: darkblue;
         }
 
         .backspace:hover {
-            background: #777;
+            background: #2b5b95;
         }
     </style>
 </head>
@@ -107,22 +107,24 @@
         <div class="buttons">
             <button class="clear" onclick="clearDisplay()">C</button>
             <button class="backspace" onclick="backspace()">⌫</button>
+            <button class="operator" onclick="appendToDisplay('%')">%</button>
             <button class="operator" onclick="appendToDisplay('/')">/</button>
-            <button class="operator" onclick="appendToDisplay('*')">*</button>
             <button onclick="appendToDisplay('7')">7</button>
             <button onclick="appendToDisplay('8')">8</button>
             <button onclick="appendToDisplay('9')">9</button>
-            <button class="operator" onclick="appendToDisplay('-')">-</button>
+            <button class="operator" onclick="appendToDisplay('*')">x</button>
             <button onclick="appendToDisplay('4')">4</button>
             <button onclick="appendToDisplay('5')">5</button>
             <button onclick="appendToDisplay('6')">6</button>
-            <button class="operator" onclick="appendToDisplay('+')">+</button>
+            <button class="operator" onclick="appendToDisplay('-')">-</button>
             <button onclick="appendToDisplay('1')">1</button>
             <button onclick="appendToDisplay('2')">2</button>
             <button onclick="appendToDisplay('3')">3</button>
-            <button class="equals" onclick="calculate()">=</button>
-            <button onclick="appendToDisplay('0')">0</button>
+            <button class="operator" onclick="appendToDisplay('+')">+</button>
             <button onclick="appendToDisplay('.')">.</button>
+            <button onclick="appendToDisplay('0')">0</button>
+            <button onclick="toggleBrackets()">()</button>
+            <button class="equals" onclick="calculate()">=</button>
         </div>
     </div>
     <script>
@@ -130,7 +132,7 @@
 
         function appendToDisplay(value) {
             let lastChar = display.value.slice(-1);
-            if (['+', '-', '*', '/'].includes(lastChar) && ['+', '-', '*', '/'].includes(value)) {
+            if (['+', '-', '*', '/', '%'].includes(lastChar) && ['+', '-', '*', '/', '%'].includes(value)) {
                 return;
             }
             display.value += value;
@@ -146,16 +148,29 @@
 
         function calculate() {
             try {
-                display.value = eval(display.value);
+                display.value = eval(display.value.replace('%', '/100'));
             } catch (error) {
                 display.value = 'Error';
             }
         }
 
+        function toggleBrackets() {
+            let openBrackets = (display.value.match(/\(/g) || []).length;
+            let closeBrackets = (display.value.match(/\)/g) || []).length;
+            
+            if (openBrackets > closeBrackets) {
+                appendToDisplay(')');
+            } else {
+                appendToDisplay('(');
+            }
+        }
+
         document.addEventListener('keydown', function(event) {
             const key = event.key;
-            if (!isNaN(key) || ['+', '-', '*', '/', '.'].includes(key)) {
+            if (!isNaN(key) || ['+', '-', '*', '/', '.', '%'].includes(key)) {
                 appendToDisplay(key);
+            } else if (key === '(' || key === ')') {
+                toggleBrackets();
             } else if (key === 'Enter') {
                 calculate();
             } else if (key === 'Backspace') {
